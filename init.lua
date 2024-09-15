@@ -160,7 +160,7 @@ vim.opt.scroll = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
-vim.keymap.set('n', 'gw', '<cmd>w<CR>', { desc = 'Shorthand for :w. [g] is the : in my split keyboard with fn key' })
+vim.keymap.set('n', 'gw', '<cmd>wa<CR>', { desc = 'Shorthand for :w. [g] is the : in my split keyboard with fn key' })
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -359,17 +359,6 @@ require('lazy').setup({
       -- do as well as how to actually do it!
       --
       --
-      local telescopeConfig = require 'telescope.config'
-
-      -- Clone the default Telescope configuration
-      local vimgrep_arguments = { unpack(telescopeConfig.values.vimgrep_arguments) }
-
-      -- I want to search in hidden/dot files.
-      table.insert(vimgrep_arguments, '--hidden')
-      -- I don't want to search in the `.git` directory.
-      table.insert(vimgrep_arguments, '--glob')
-      table.insert(vimgrep_arguments, '!**/.git/*')
-
       -- [[ Configure Telescope ]]
       -- See `:help telescope` and `:help telescope.setup()`
       require('telescope').setup {
@@ -388,7 +377,7 @@ require('lazy').setup({
             '--hidden',
             '--no-ignore',
           },
-          file_ignore_patterns = { 'node_modules', '%.git/', '.venv' },
+          file_ignore_patterns = { '__pycache__', 'node_modules', '%.git/', '.venv', 's3%-files', 'target', '.pytest_cache' },
         },
         pickers = {
           find_files = {
@@ -428,10 +417,7 @@ require('lazy').setup({
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
-        builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
-          previewer = false,
-        })
+        builtin.current_buffer_fuzzy_find()
       end, { desc = '[/] Fuzzily search in current buffer' })
 
       -- It's also possible to pass additional configuration options.
@@ -475,6 +461,7 @@ require('lazy').setup({
       -- used for completion, annotations and signatures of Neovim apis
       { 'folke/neodev.nvim', opts = {} },
     },
+
     config = function()
       -- Brief aside: **What is LSP?**
       --
@@ -592,9 +579,24 @@ require('lazy').setup({
           --
           -- This may be unwanted, since they displace some of your code
           if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-            end, '[T]oggle Inlay [H]ints')
+            local inlay_hint_group = vim.api.nvim_create_augroup('inline-hint-autotoggle', { clear = false })
+            vim.lsp.inlay_hint.enable(true)
+
+            -- Toggle inline hints when goin in and out of insert mode
+            vim.api.nvim_create_autocmd('InsertEnter', {
+              buffer = event.buf,
+              group = inlay_hint_group,
+              callback = function()
+                vim.lsp.inlay_hint.enable(false)
+              end,
+            })
+            vim.api.nvim_create_autocmd('InsertLeave', {
+              buffer = event.buf,
+              group = inlay_hint_group,
+              callback = function()
+                vim.lsp.inlay_hint.enable(true)
+              end,
+            })
           end
         end,
       })
@@ -638,6 +640,7 @@ require('lazy').setup({
             },
           },
         },
+        -- rust analyser is handled by rust-tools
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -649,6 +652,8 @@ require('lazy').setup({
         ruff_lsp = {
           on_attach = on_attach,
         },
+        --Toml lsp
+        taplo = {},
 
         lua_ls = {
           -- cmd = {...},
@@ -692,6 +697,8 @@ require('lazy').setup({
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
+          -- disabling rust_analyzer from mason-lspconfig since rustaceanvim is handling it.
+          rust_analyzer = function() end,
         },
       }
     end,
@@ -724,12 +731,27 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        toml = { 'taplo' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
+      },
+      formatters = {
+        taplo = {
+          args = {
+            'format',
+            '--option',
+            'reorder_arrays=true',
+            '--option',
+            'reorder_keys=true',
+            '--option',
+            'indent_string=    ',
+            '-',
+          },
+        },
       },
     },
   },
@@ -861,7 +883,14 @@ require('lazy').setup({
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
+    transparent = true,
+    styles = {
+      sidebars = 'transparent',
+      floats = 'transparent',
+    },
   },
+  -- transparency
+  { 'xiyaowong/transparent.nvim' },
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
@@ -935,7 +964,6 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
-
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -957,7 +985,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
