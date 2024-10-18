@@ -171,10 +171,39 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagn
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Scroll keymaps
 vim.keymap.set('n', '<C-Up>', '<C-U>', { desc = 'Scroll up with cursor' })
 vim.keymap.set('n', '<C-Down>', '<C-D>', { desc = 'Scroll down with cursor' })
 vim.keymap.set('n', '<S-Up>', '10<C-Y>', { desc = 'Scroll up' })
 vim.keymap.set('n', '<S-Down>', '10<C-E>', { desc = 'Scroll down' })
+
+-- Mark keymaps
+-- NOTE: maybe try marks plugin? this should be enough for now
+local low = function(i)
+  return string.char(97 + i)
+end
+local upp = function(i)
+  return string.char(65 + i)
+end
+
+for i = 0, 25 do
+  vim.keymap.set('n', 'm' .. low(i), 'm' .. upp(i))
+end
+for i = 0, 25 do
+  vim.keymap.set('n', 'm' .. upp(i), 'm' .. low(i))
+end
+for i = 0, 25 do
+  vim.keymap.set('n', 'jm' .. low(i), "'" .. upp(i))
+end
+for i = 0, 25 do
+  vim.keymap.set('n', 'jm' .. upp(i), "'" .. low(i))
+end
+for i = 0, 25 do
+  vim.keymap.set('n', 'dm' .. low(i), '<cmd>delmarks ' .. upp(i) .. '<CR>')
+end
+for i = 0, 25 do
+  vim.keymap.set('n', 'dm' .. upp(i), '<cmd>delmarks ' .. low(i) .. '<CR>')
+end
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -383,6 +412,9 @@ require('lazy').setup({
           find_files = {
             find_command = { 'rg', '--files', '--no-ignore', '--hidden' },
           },
+          buffers = {
+            sort_lastused = true,
+          },
         },
         extensions = {
           ['ui-select'] = {
@@ -413,6 +445,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sm', builtin.marks, { desc = '[S]earch [M]arks' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
