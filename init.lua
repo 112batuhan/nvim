@@ -190,13 +190,7 @@ for i = 0, 25 do
   vim.keymap.set('n', 'm' .. low(i), 'm' .. upp(i))
 end
 for i = 0, 25 do
-  vim.keymap.set('n', 'm' .. upp(i), 'm' .. low(i))
-end
-for i = 0, 25 do
   vim.keymap.set('n', 'jm' .. low(i), "'" .. upp(i))
-end
-for i = 0, 25 do
-  vim.keymap.set('n', 'jm' .. upp(i), "'" .. low(i))
 end
 for i = 0, 25 do
   vim.keymap.set('n', 'dm' .. low(i), '<cmd>delmarks ' .. upp(i) .. '<CR>')
@@ -204,6 +198,7 @@ end
 for i = 0, 25 do
   vim.keymap.set('n', 'dm' .. upp(i), '<cmd>delmarks ' .. low(i) .. '<CR>')
 end
+vim.keymap.set('n', 'dma', '<cmd>delmarks A-Z<CR>')
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
