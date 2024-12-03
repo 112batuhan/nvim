@@ -157,6 +157,9 @@ vim.opt.scrolloff = 10
 -- Scroll length
 vim.opt.scroll = 10
 
+-- tab lengt
+vim.opt.tabstop = 4
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -179,6 +182,7 @@ vim.keymap.set('n', '<S-Down>', '10<C-E>', { desc = 'Scroll down' })
 
 -- Mark keymaps
 -- NOTE: maybe try marks plugin? this should be enough for now
+-- TODO: rework this, maybe get used to original binds
 local low = function(i)
   return string.char(97 + i)
 end
@@ -195,6 +199,14 @@ for i = 0, 25 do
   vim.keymap.set('n', 'dm' .. upp(i), '<cmd>delmarks ' .. low(i) .. '<CR>')
 end
 vim.keymap.set('n', 'dmA', '<cmd>delmarks A-Z<CR>')
+
+-- line keymaps (i'm not using "sentence" keybindings so it's fine)
+vim.keymap.set('n', ')', '$', { noremap = true, silent = true, desc = 'go to the start of the line ($)' })
+vim.keymap.set('n', '(', '^', { noremap = true, silent = true, desc = 'go to the end of the line (^)' })
+vim.keymap.set('x', ')', '$', { noremap = true, silent = true, desc = 'go to the start of the line ($)' })
+vim.keymap.set('x', '(', '^', { noremap = true, silent = true, desc = 'go to the end of the line (^)' })
+vim.keymap.set('o', ')', '$', { noremap = true, silent = true, desc = 'go to the start of the line ($)' })
+vim.keymap.set('o', '(', '^', { noremap = true, silent = true, desc = 'go to the end of the line (^)' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -680,7 +692,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {},
         pyright = {
           settings = {
             pyright = {
@@ -787,6 +799,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         toml = { 'taplo' },
+        go = { 'gofmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -922,6 +935,7 @@ require('lazy').setup({
     end,
   },
 
+  -- TODO: FIX THIS
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
