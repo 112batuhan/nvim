@@ -1,9 +1,21 @@
 return {
   "folke/snacks.nvim",
   opts = {
-    picker = {sources={explorer={layout = { layout = { position = "right" } }}}},
+    picker = {
+      sources = {
+        explorer = {
+          layout = {
+            layout = {
+              position = "right",
+            },
+          },
+          auto_close = true,
+        },
+      },
+    },
     explorer = {},
   },
+  -- stylua: ignore
   keys = {
     -- Top Pickers & Explorer
     { "<leader><space>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
