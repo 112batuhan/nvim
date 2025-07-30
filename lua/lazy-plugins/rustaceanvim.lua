@@ -7,7 +7,7 @@ return {
       callback = function(args)
         local client = vim.lsp.get_client_by_id(args.data.client_id)
         if client and client.name == "rust-analyzer" then
-          vim.keymap.set("n", "<leader>he", function()
+          vim.keymap.set("n", "<leader>re", function()
             vim.cmd.RustLsp({ "renderDiagnostic", "current" })
           end, { desc = "Explaining rust errors" })
         end
