@@ -91,6 +91,10 @@ return {
       local lspconfig = require("lspconfig")
 
       for server, config in pairs(opts.servers) do
+        -- skip rust_analyzer attachment here
+        if server == "rust_analyzer" then
+          goto continue
+        end
         -- Merge capabilities with blink.cmp
         config.capabilities = require("blink.cmp").get_lsp_capabilities(config.capabilities)
 
@@ -108,6 +112,7 @@ return {
 
         lspconfig[server].setup(config)
       end
+      ::continue::
     end,
   },
 }
