@@ -52,6 +52,8 @@ return {
         lua_ls = {
           settings = {
             Lua = {
+              -- Normally this would make it work,
+              -- but since I'm doing custom on_attach things, this is not properly working
               diagnostics = { globals = { "vim", "Snacks" } },
               workspace = { checkThirdParty = false },
               telemetry = { enable = false },

@@ -57,5 +57,5 @@ vim.opt.scroll = 10
 -- tab lengt
 vim.opt.tabstop = 4
 
--- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
+-- show inline diagnostics
+vim.diagnostic.config({ virtual_text = true })
